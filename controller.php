@@ -1,174 +1,191 @@
 <?php
+header('Content-Type: application/json');
+global $conn;
+include 'credentials.php';
 
-$servername = "mariadb";
-$username = "root";
-$password = "password";
-$conn = new mysqli($servername, $username, $password);
-
-if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
-
-if (!empty($_POST['Button'])) {
-    echo buildHtml(getTableData($_POST['filterattribut']));
-    return;
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-if (!empty($_POST['Reset'])) resetDB();
+if (isset($_POST["action"])) {
+    switch ($_POST["action"]) {
+        case 'get_databases':
+            echo json_encode(getDatabaseNames());
+            break;
+        case 'get_tables':
+            if (isset($_POST["database"])) {
+                echo json_encode(getTableNames($_POST["database"]));
+            }
+            break;
+        case 'get_table_data':
+            if (isset($_POST["database"]) && isset($_POST["table"])) {
+                echo json_encode(getTable($_POST["database"], $_POST["table"]));
+            }
+            break;
+        case 'delete_row':
+            if (isset($_POST["database"]) && isset($_POST["table"]) && isset($_POST["id"])) {
+                $sql = "DELETE FROM " . $_POST["database"] . "." . $_POST["table"] . " WHERE id=" . $_POST["id"];
+                $conn->query($sql);
+                echo json_encode(array('status' => 'success'));
+            } else {
+                echo json_encode(array('status' => 'error'));
+            }
+            break;
+        case 'reset_database':
+            if (isset($_POST["database"])) {
+                $success = resetDatabase($_POST["database"]);
+                echo json_encode(array('status' => $success ? 'success' : 'error'));
+            } else {
+                echo json_encode(array('status' => 'error'));
+            }
+            break;
+        case 'update_row':
+            if (isset($_POST["database"]) && isset($_POST["table"]) && isset($_POST["id"]) && isset($_POST["data"])) {
+                $success = updateRow($_POST["database"], $_POST["table"], $_POST["id"], $_POST["data"]);
+                echo json_encode(array('status' => 'success'));
+            }
+            break;
+        case 'add_row':
+            if (isset($_POST["database"]) && isset($_POST["table"]) && isset($_POST["data"])) {
+                $data = $_POST["data"];
+                $columns = implode(", ", array_keys($data));
+                $values = implode("', '", array_values($data));
+                $sql = "INSERT INTO " . $_POST["database"] . "." . $_POST["table"] . " ($columns) VALUES ('$values')";
+                $conn->query($sql);
+                echo json_encode(array('status' => 'success'));
+            }
+            break;
 
-if (!empty($_POST['add'])) {
-    addBuch($_POST['titel'], $_POST['verkaufspreis'], $_POST['einkaufspreis'], $_POST['erscheinungsjahr'], $_POST['verlage_verlage_id']);
-}
-
-if (!empty($_POST['edit'])) {
-    editBuch($_POST['buecher_id'], $_POST['titel'], $_POST['verkaufspreis'], $_POST['einkaufspreis'], $_POST['erscheinungsjahr'], $_POST['verlage_verlage_id']);
-}
-
-if (!empty($_POST['remove'])) {
-    removeBuch($_POST['buecher_id']);
-}
-
-if (!empty($_POST['search'])) {
-    $buecher = searchBuch($_POST['titel']);
-    foreach ($buecher as $buch) {
-        echo "ID: " . $buch['buecher_id'] . "<br>";
-        echo "Titel: " . $buch['titel'] . "<br>";
-        echo "Verkaufspreis: " . $buch['verkaufspreis'] . "<br>";
-        echo "Einkaufspreis: " . $buch['einkaufspreis'] . "<br>";
-        echo "Erscheinungsjahr: " . $buch['erscheinungsjahr'] . "<br>";
-        echo "Verlage ID: " . $buch['verlage_verlage_id'] . "<br>";
-        echo "<hr>";
     }
 }
 
-if (!empty($_POST['fetch'])) {
-    $buch = getBuch($_POST['buecher_id']);
-    ?>
-    <form action="" method="post" class="dumme-get-form">
-        <h2 style="text-align: center">Buch bearbeiten</h2>
-        <label for="buecher_id">Buch ID: </label>
-        <label>
-            <input type="number" name="buecher_id" value="<?php echo $buch['buecher_id']; ?>" readonly>
-        </label>
+$buchladen_path = '/buchladen.sql';
+$lager_path = '/lager.sql';
+function resetDatabase($database)
+{
+    global $buchladen_path, $lager_path;
+    if ($database == 'buchladen') {
+        $sql = file_get_contents($buchladen_path);
+    } else if ($database == 'lager') {
+        $sql = file_get_contents($lager_path);
+    } else {
+        return false;
+    }
 
-        <label for="titel">Titel: </label>
-        <label>
-            <input type="text" name="titel" value="<?php echo $buch['titel']; ?>">
-        </label>
-
-        <label for="verkaufspreis">Verkaufspreis: </label>
-        <label>
-            <input type="number" step="0.01" name="verkaufspreis" value="<?php echo $buch['verkaufspreis']; ?>">
-        </label>
-
-        <label for="einkaufspreis">Einkaufspreis: </label>
-        <label>
-            <input type="number" step="0.01" name="einkaufspreis" value="<?php echo $buch['einkaufspreis']; ?>">
-        </label>
-
-        <label for="erscheinungsjahr">Erscheinungsjahr: </label>
-        <label>
-            <input type="number" name="erscheinungsjahr" value="<?php echo $buch['erscheinungsjahr']; ?>">
-        </label>
-
-        <label for="verlage_verlage_id">Verlag ID: </label>
-        <label>
-            <input type="number" name="verlage_verlage_id" value="<?php echo $buch['verlage_verlage_id']; ?>">
-        </label>
-
-        <button type="submit" name="edit" class="button" value="edit">Bearbeiten</button>
-    </form>
-    <?php
+    global $conn;
+    $conn->multi_query($sql);
+    return true;
 }
 
-
-function getTableData($sortBy): array
+function updateRow($database, $table, $id, $data)
 {
     global $conn;
-    $sort = match ($sortBy) {
-        "verkaufspreis" => "ORDER BY verkaufspreis DESC",
-        "einkaufspreis" => "ORDER BY einkaufspreis DESC",
-        "verlage_verlage_id" => "ORDER BY verlage_verlage_id DESC",
-        default => "ORDER BY buecher_id DESC",
-    };
-    $result = $conn->query("SELECT * FROM buchladen.buecher " . $sort);
-    while ($row = $result->fetch_assoc()) $tableData[] = $row;
-    return $tableData ?? [];
+    $sql = "UPDATE $database.$table SET ";
+    foreach ($data as $key => $value) {
+        $sql .= "$key='$value',";
+    }
+    $sql = rtrim($sql, ',');
+    $sql .= " WHERE id=$id";
+    $conn->query($sql);
+    return true;
 }
 
-function addBuch(string $titel, float $verkaufspreis, float $einkaufspreis, int $erscheinungsjahr, int $verlage_verlage_id): void
+function getDatabaseNames()
 {
     global $conn;
-    $stmt = $conn->prepare("INSERT INTO buchladen.buecher (titel, verkaufspreis, einkaufspreis, erscheinungsjahr, verlage_verlage_id) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("sddii", $titel, $verkaufspreis, $einkaufspreis, $erscheinungsjahr, $verlage_verlage_id);
-    $result = $stmt->execute();
-    echo $result ? sprintf("Einfügen des Buches %s war erfolgreich.", $titel) : "Etwas ist schief gegangen";
-}
-
-function editBuch(int $buecher_id, string $titel, float $verkaufspreis, float $einkaufspreis, int $erscheinungsjahr, int $verlage_verlage_id): void
-{
-    global $conn;
-    $stmt = $conn->prepare("UPDATE buchladen.buecher SET titel = ?, verkaufspreis = ?, einkaufspreis = ?, erscheinungsjahr = ?, verlage_verlage_id = ? WHERE buecher_id = ?");
-    $stmt->bind_param("sddiii", $titel, $verkaufspreis, $einkaufspreis, $erscheinungsjahr, $verlage_verlage_id, $buecher_id);
-    $result = $stmt->execute();
-    echo $result ? sprintf("Bearbeiten des Buches %s war erfolgreich.", $titel) : "Etwas ist schief gegangen";
-}
-
-function getBuch(int $buecher_id): array
-{
-    global $conn;
-    $stmt = $conn->prepare("SELECT * FROM buchladen.buecher WHERE buecher_id = ?");
-    $stmt->bind_param("i", $buecher_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $buch = $result->fetch_assoc();
-    return $buch ? $buch : [];
-}
-
-function removeBuch(int $buecher_id): void
-{
-    global $conn;
-    $stmt = $conn->prepare("DELETE FROM buchladen.buecher WHERE buecher_id = ?");
-    $stmt->bind_param("i", $buecher_id);
-    $result = $stmt->execute();
-    echo $result ? "Das Buch wurde erfolgreich entfernt." : "Etwas ist schief gelaufen";
-}
-
-function searchBuch(string $titel): array
-{
-    global $conn;
-    $stmt = $conn->prepare("SELECT * FROM buchladen.buecher WHERE titel LIKE ?");
-    $titel = "%" . $titel . "%"; // Add wildcard characters for a partial match
-    $stmt->bind_param("s", $titel);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    return $result->fetch_all(MYSQLI_ASSOC);
-}
-
-function buildHtml($data): string
-{
-    $htmlString = '<table><tr><th>Buch ID</th><th>Titel</th><th>Verkaufspreis</th><th>Einkaufspreis</th><th>Erscheinungsjahr</th><th>Verlag ID</th></tr>';
-    if ($data) {
-        foreach ($data as $row) {
-            $htmlString .= '<tr>';
-            foreach ($row as $value) $htmlString .= '<td>' . $value . '</td>';
-            $htmlString .= '</tr>';
+    $sql = "SHOW DATABASES";
+    $result = $conn->query($sql);
+    $databases = array();
+    $systemDatabases = array('information_schema', 'mysql', 'performance_schema', 'sys');
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            if (!in_array($row['Database'], $systemDatabases)) {
+                $databases[] = $row['Database'];
+            }
         }
     }
-    $htmlString .= '</table>';
-    return "<div class='database-table'>$htmlString</div>";
+    return $databases;
 }
 
-function resetDB(): void
+function getTableNames($database)
 {
     global $conn;
-    $lines = file('buchladen.sql');
-    $tempLine = '';
-    foreach ($lines as $line) {
-        if (str_starts_with($line, '--') || $line == '') continue;
-        $tempLine .= $line;
-        if (str_ends_with(trim($line), ';')) {
-            mysqli_query($conn, $tempLine) or print("Error in " . $tempLine . ":" . mysqli_error($conn));
-            $tempLine = '';
+    $sql = "SHOW TABLES FROM $database";
+    $result = $conn->query($sql);
+    $tables = array();
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $tables[] = $row["Tables_in_$database"];
         }
     }
-    echo "Tables imported successfully";
+    return $tables;
+}
+
+function getTableData($database, $table)
+{
+    global $conn;
+    $sql = "SELECT * FROM $database.$table";
+    $result = $conn->query($sql);
+    $data = array();
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $data[] = $row;
+        }
+    }
+    return $data;
+}
+
+function getTableColumns($database, $table)
+{
+
+    global $conn;
+    if ($table == 'dashboard') {
+        return getTableStatusColumns($database);
+    }
+    $sql = "SHOW COLUMNS FROM $database.$table";
+    $result = $conn->query($sql);
+    $columns = array();
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $columns[] = $row['Field'];
+        }
+    }
+    return $columns;
+}
+
+function getTable($database, $table)
+{
+    $columns = getTableColumns($database, $table);
+
+    $data = $table == 'dashboard'
+        ? getDatabaseStatus($database)
+        : getTableData($database, $table);
+    return array('columns' => $columns, 'data' => $data);
+}
+
+function getDatabaseStatus($database)
+{
+    global $conn;
+    $statusTable = array();
+    $sql = "SHOW TABLE STATUS FROM $database";
+    $result = $conn->query($sql);
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $statusTable[] = $row;
+        }
+    }
+    return $statusTable;
+}
+
+function getTableStatusColumns($database)
+{
+    global $conn;
+    $sql = "SHOW TABLE STATUS FROM $database";
+    $result = $conn->query($sql);
+    $fields = $result->fetch_fields();
+    $columns = array();
+    foreach ($fields as $field) {
+        $columns[] = $field->name;
+    }
+    return $columns;
 }
