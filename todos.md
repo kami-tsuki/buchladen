@@ -1,0 +1,24 @@
+- [x] Show Databases
+- [x] Select Databases
+- [x] Show Tables
+- [x] Show DashBoard
+- [x] Select Table
+- [x] Show Table Data
+- [x] Search in Table Data
+- [x] Sort/Order Table ASC/DESC
+- [x] Add Error/Issue Banner
+- [x] Add Loading Banner
+- [ ] Hide/Show Columns
+- [ ] Paging
+- [ ] Remove Rows
+- [ ] Edit Rows
+- [ ] Add Rows
+- [ ] Add custom Query sender
+- [ ] Add Filter per Column
+- [ ] Add Light/Dark Mode
+- [ ] Cyberpunk theme
+- [ ] Add row
+- [ ] Edit Row
+- [ ] Add Complete Dashboard
+- [ ] Add settings vor Credentials
+- [ ] Add foregin Key support
