@@ -80,12 +80,14 @@ tr.db-table-row:hover {
 #issue-banner {
     display: none;
     position: fixed;
-    bottom: 0;
+    bottom: 10%;
     width: 100%;
     background-color: var(--issue-bg-color);
     border: 2px solid var(--issue-border-color);
     color: var(--issue-text-color);
     padding: 10px;
+    z-index:9999;
+
 }
 
 #issue-close, #issue-copy{

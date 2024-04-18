@@ -18,12 +18,19 @@ if (isset($_POST["action"])) {
             }
             break;
         case 'get_table_data':
-            if (isset($_POST["database"]) && isset($_POST["table"])) {
+            if (
+                isset($_POST["database"])
+                && isset($_POST["table"])
+            ) {
                 echo json_encode(getTable($_POST["database"], $_POST["table"]));
             }
             break;
         case 'delete_row':
-            if (isset($_POST["database"]) && isset($_POST["table"]) && isset($_POST["id"])) {
+            if (
+                isset($_POST["database"])
+                && isset($_POST["table"])
+                && isset($_POST["id"])
+            ) {
                 $sql = "DELETE FROM " . $_POST["database"] . "." . $_POST["table"] . " WHERE id=" . $_POST["id"];
                 $conn->query($sql);
                 echo json_encode(array('status' => 'success'));
@@ -40,13 +47,22 @@ if (isset($_POST["action"])) {
             }
             break;
         case 'update_row':
-            if (isset($_POST["database"]) && isset($_POST["table"]) && isset($_POST["id"]) && isset($_POST["data"])) {
+            if (
+                isset($_POST["database"])
+                && isset($_POST["table"])
+                && isset($_POST["id"])
+                && isset($_POST["data"])
+            ) {
                 $success = updateRow($_POST["database"], $_POST["table"], $_POST["id"], $_POST["data"]);
                 echo json_encode(array('status' => 'success'));
             }
             break;
         case 'add_row':
-            if (isset($_POST["database"]) && isset($_POST["table"]) && isset($_POST["data"])) {
+            if (
+                isset($_POST["database"])
+                && isset($_POST["table"])
+                && isset($_POST["data"])
+            ) {
                 $data = $_POST["data"];
                 $columns = implode(", ", array_keys($data));
                 $values = implode("', '", array_values($data));
@@ -59,13 +75,13 @@ if (isset($_POST["action"])) {
     }
 }
 
-$buchladen_path = '/buchladen.sql';
+$buchladenPath = '/buchladen.sql';
 $lager_path = '/lager.sql';
 function resetDatabase($database)
 {
-    global $buchladen_path, $lager_path;
+    global $buchladenPath, $lager_path;
     if ($database == 'buchladen') {
-        $sql = file_get_contents($buchladen_path);
+        $sql = file_get_contents($buchladenPath);
     } else if ($database == 'lager') {
         $sql = file_get_contents($lager_path);
     } else {
