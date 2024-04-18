@@ -1,0 +1,19 @@
+.button:hover {
+    background-color: #A4A4A4;
+}
+
+table, td, tr, th{
+    border: 1px solid black;
+}
+
+td, th {
+    padding: 5px;
+}
+
+tr:hover {
+    background-color: #CEE3F6;
+}
+
+#customSelect {
+    width: 100%;
+}
