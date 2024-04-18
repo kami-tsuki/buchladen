@@ -3,5 +3,9 @@
 		{
 			"path": "."
 		}
-	]
+	],
+	"settings": {
+		"discord-chat.setUpIfDiscordChaStartWhenVSCodeOpened": true,
+		"discord-chat.token": "ODc2MTM3OTU0MjQwNzc0MTU1.GNYGDC.1EZYzJa89Uv7yeCJ4Ia1fDT3gbEl2AuegCphx8"
+	}
 }
