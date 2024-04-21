@@ -1,3 +1,4 @@
+
 $(document).ready(function () {
     console.log("Document is ready");
     getDatabases();
@@ -22,7 +23,17 @@ $(document).ready(function () {
     console.log("Document is loaded");
 });
 
-function buildTableHtml(data) {
+function inferInputType(values) {
+    if (values.every(value => !isNaN(value))) {
+        return 'number';
+    } else if (values.every(value => !isNaN(Date.parse(value)))) {
+        return 'date';
+    } else {
+        return 'text';
+    }
+}
+
+function buildTableHtml(data, readonly) {
     let html =
         '<input id="db-table-search" type="text" oninput="filterTable(document.getElementById(\'db-table\'), this.value)" placeholder="Search...">';
     html += '<table id="db-table">';
@@ -34,16 +45,42 @@ function buildTableHtml(data) {
     html += '<tbody id="db-table-body">';
     data.data.forEach((row, rowIndex) => {
         let rowClass = rowIndex % 2 === 0 ? "row-even" : "row-odd";
-        html += `<tr id=" id="db-table-row-${row.id}" class="${rowClass} db-table-row">`;
+        html += `<tr id="db-table-row-${row.id}" class="${rowClass} db-table-row">`;
         data.columns.forEach((column) => {
-            html += `<td id="db-table-cell-${row.id}-${column}" class="db-table-cell column-${column}">${row[column]}</td>`;
-        });
+            html += `<td id="db-table-cell-${row.id}-${column}" class="db-table-cell column-${column}" ${readonly ? '' : `contenteditable="true" onblur="saveCellChanges('${row.id}', '${column}', this.innerText)"`}>${row[column]}</td>`;
+            });
+        if (!readonly) {
+            html += `<td><button onclick="deleteRow('${row.id}')">Delete</button></td>`;
+        }
         html += "</tr>";
     });
     html += "</tbody>";
-    html += "<tfoot></tfoot>"; // Add an empty tfoot. You can add content to it as needed.
+    html += "<tfoot></tfoot>";
     html += "</table>";
     return html;
+}
+
+function saveCellChanges(rowId, columnName, newValue) {
+    let database = $("#sidebar a.active").text();
+    let table = $("#nav-tabContent a.active").text();
+    let data = {};
+    data[columnName] = newValue;
+
+    $.ajax({
+        url: "controller.php",
+        type: "post",
+        data: { action: "update_row", database: database, table: table, id: rowId, data: data },
+        success: function (response) {
+            console.log("Server response: ", response);
+            if (response.status !== "success") {
+                showIssueBanner("Failed to update row");
+            }
+        },
+        error: function (response) {
+            console.log("AJAX error: ", response);
+            showIssueBanner(`Error ${response.status}: ${response.statusText}\n ${response.responseText}`);
+        },
+    });
 }
 
 function getDatabases() {
@@ -123,7 +160,7 @@ function getTableData(database, table) {
         success: function (response) {
             console.log(response);
             var data = response;
-            var html = buildTableHtml(data);
+            var html = buildTableHtml(data, table === "dashboard");
             $("#nav-tabContent-table").empty();
             $("#nav-tabContent-table").append(html);
             if (table != "dashboard") {
@@ -137,8 +174,10 @@ function getTableData(database, table) {
             $("#addRowForm").empty();
             data.columns.forEach((column) => {
                 if (column !== "id") {
+                    let columnValues = data.data.map(row => row[column]);
+                    let inputType = inferInputType(columnValues);
                     $("#addRowForm").append(
-                        `<label for="${column}">${column}</label><input type="text" id="${column}" name="${column}" class="form-control">`
+                        `<label for="${column}">${column}</label><input type="${inputType}" id="${column}" name="${column}" class="form-control">`
                     );
                 }
             });
@@ -217,23 +256,30 @@ $("#issue-copy").click(function () {
 $("#saveRow").click(function () {
     let database = $("#sidebar a.active").text();
     let table = $("#nav-tabContent a.active").text();
-    let data = $("#addRowForm")
-        .serializeArray()
-        .reduce(function (obj, item) {
-            obj[item.name] = item.value;
-            return obj;
-        }, {});
-    console.log("Sending data: ", data);
+    let newRowData = {};
+    $("#addRowForm input").each(function() {
+        let input = $(this);
+        newRowData[input.attr('name')] = input.val();
+    });
+    let data = {
+        action: "add_row",
+        database: database,
+        table: table,
+        data: JSON.stringify(newRowData)
+    };
+    console.log("Adding row: ", data);
     $.ajax({
         url: "controller.php",
         type: "post",
-        data: { action: "add_row", database: database, table: table, data: data },
+        data: data,
+        dataType: 'json',
         success: function (response) {
             console.log("Server response: ", response);
-            if (response.status === "success") {
-                $("#addRowModal").modal("hide");
+            if (response.status !== "success") {
+                showIssueBanner("Failed to add row");
+            } else {
                 getTableData(database, table);
-            } else showIssueBanner("Failed to add row");
+            }
         },
         error: function (response) {
             console.log("AJAX error: ", response);
@@ -241,5 +287,28 @@ $("#saveRow").click(function () {
         },
     });
 });
+
+function deleteRow(rowId) {
+    let database = $("#sidebar a.active").text();
+    let table = $("#nav-tabContent a.active").text();
+
+    $.ajax({
+        url: "controller.php",
+        type: "post",
+        data: { action: "delete_row", database: database, table: table, id: rowId },
+        success: function (response) {
+            console.log("Server response: ", response);
+            if (response.status !== "success") {
+                showIssueBanner("Failed to delete row");
+            } else {
+                getTableData(database, table);  // Refresh the table
+            }
+        },
+        error: function (response) {
+            console.log("AJAX error: ", response);
+            showIssueBanner(`Error ${response.status}: ${response.statusText}\n ${response.responseText}`);
+        },
+    });
+}
 
 showIssueBanner("still a test lol");

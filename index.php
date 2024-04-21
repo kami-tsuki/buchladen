@@ -54,6 +54,7 @@
                 <div class="modal-body">
                     <form id="addRowForm">
                         <!-- Input fields will be added here dynamically -->
+                        <input type="text" id="newRowData" placeholder="Enter new row data">
                     </form>
                 </div>
                 <div class="modal-footer">
