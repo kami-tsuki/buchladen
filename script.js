@@ -1,61 +1,148 @@
+const CONTROLLER_URL = "controller.php";
+const LOADING_BANNER = $("#loading-banner");
+const ISSUE_BANNER = $("#issue-banner");
+const ISSUE_MESSAGE = $("#issue-message");
+var URL = new URL(window.location.href);
+var database = URL.searchParams.get("database");
+var table = URL.searchParams.get("table");
+var tableData = null;
+const SUCCESS_BANNER = $("#success-banner");
+const SUCCESS_MESSAGE = $("#success-message");
 
-$(document).ready(function () {
-    console.log("Document is ready");
-    getDatabases();
-    $("#sidebar").on("click", "a", function (e) {
-        e.preventDefault();
-        $("#sidebar a").removeClass("active");
-        $(this).addClass("active");
-        var database = $(this).text();
-
-        console.log("Clicked on database " + database);
-        getTables(database);
-    });
-    $("#nav-tabContent").on("click", "a", function (e) {
-        e.preventDefault();
-        $("#nav-tabContent a").removeClass("active");
-        $(this).addClass("active");
-        let database = $("#sidebar a.active").text();
-        let table = $(this).text();
-        console.log("Clicked on table " + table);
-        getTableData(database, table);
-    });
-    console.log("Document is loaded");
-});
-
-function inferInputType(values) {
-    if (values.every(value => !isNaN(value))) {
-        return 'number';
-    } else if (values.every(value => !isNaN(Date.parse(value)))) {
-        return 'date';
-    } else {
-        return 'text';
-    }
+function showIssueBanner(message) {
+    ISSUE_MESSAGE.text(message);
+    ISSUE_BANNER.show();
+    setTimeout(function () {
+        ISSUE_BANNER.fadeOut();
+    }, 10000);
 }
 
-function buildTableHtml(data, readonly) {
-    let html =
-        '<input id="db-table-search" type="text" oninput="filterTable(document.getElementById(\'db-table\'), this.value)" placeholder="Search...">';
-    html += '<table id="db-table">';
-    html += '<thead  id="db-table-header"><tr id="db-table-header-row">';
-    data.columns.forEach((column, index) => {
+function showSuccessBanner(message) {
+    SUCCESS_MESSAGE.text(message);
+    SUCCESS_BANNER.show();
+    setTimeout(function () {
+        SUCCESS_BANNER.fadeOut();
+    }, 10000);
+}
+
+function log(message) {
+    console.log(message);
+}
+
+function ajaxRequest(type, data, successCallback, errorCallback) {
+    LOADING_BANNER.show();
+    $.ajax({
+        url: CONTROLLER_URL,
+        type: type,
+        data: data,
+        success: function (response) {
+            log(response);
+            successCallback(response);
+            LOADING_BANNER.hide();
+        },
+        error: function (response) {
+            log(response);
+            showIssueBanner(response.responseText);
+            LOADING_BANNER.hide();
+            if (errorCallback) errorCallback(response);
+        },
+    });
+}
+
+function buildTableHeader(columns) {
+    let html = '<thead  id="db-table-header"><tr id="db-table-header-row">';
+    console.log('columns in buildTableHeader:', columns);
+    columns.forEach((column, index) => {
         html += `<th id="db-table-header-cell-${column}" onclick="sortTable(document.getElementById('db-table'), ${index})" draggable="true" ondragend="reorderColumn(event, ${index})">${column}</th>`;
     });
     html += "</tr></thead>";
-    html += '<tbody id="db-table-body">';
-    data.data.forEach((row, rowIndex) => {
-        let rowClass = rowIndex % 2 === 0 ? "row-even" : "row-odd";
-        html += `<tr id="db-table-row-${row.id}" class="${rowClass} db-table-row">`;
-        data.columns.forEach((column) => {
-            html += `<td id="db-table-cell-${row.id}-${column}" class="db-table-cell column-${column}" ${readonly ? '' : `contenteditable="true" onblur="saveCellChanges('${row.id}', '${column}', this.innerText)"`}>${row[column]}</td>`;
-            });
-        if (!readonly) {
-            html += `<td><button onclick="deleteRow('${row.id}')">Delete</button></td>`;
-        }
-        html += "</tr>";
+    return html;
+}
+
+function buildTableRow(row, columns, readonly) {
+    let html = `<tr id="db-table-row-${row.id}" class="db-table-row">`;
+    columns.forEach((column) => {
+        html += `<td id="db-table-cell-${row.id}-${column}" class="db-table-cell column-${column}" ${readonly ? '' : `contenteditable="true" onblur="saveCellChanges('${row.id}', '${column}', this.innerText)"`}>${row[column]}</td>`;
+    });
+    if (!readonly) {
+        html += `<td><button onclick="deleteRow('${row.id}')">Delete</button></td>`;
+    }
+    html += "</tr>";
+    return html;
+}
+
+function buildTableBody(data, readonly) {
+    let html = '<tbody id="db-table-body">';
+    console.log('data in buildTableBody:', data);
+    data.data.forEach((row) => {
+        html += buildTableRow(row, data.columns, readonly);
     });
     html += "</tbody>";
-    html += "<tfoot></tfoot>";
+    return html;
+}
+
+function reorderColumn(event, index) {
+    console.log('event in reorderColumn:', event);
+    let newIndex = event.target.cellIndex;
+    if (newIndex !== index) {
+        [tableData.columns[index], tableData.columns[newIndex]] = [tableData.columns[newIndex], tableData.columns[index]];
+        tableData.data.forEach(row => {
+            [row[tableData.columns[index]], row[tableData.columns[newIndex]]] = [row[tableData.columns[newIndex]], row[tableData.columns[index]]];
+        });
+        let html = buildTableHtml(tableData, false);
+        $("#nav-tabContent-table").empty();
+        $("#nav-tabContent-table").append(html);
+    }
+}
+
+function inferInputType(columnValues) {
+    let isNumber = true;
+    let isDate = true;
+
+    for (let i = 0; i < columnValues.length; i++) {
+        if (isNaN(columnValues[i])) {
+            isNumber = false;
+        }
+        if (isNaN(Date.parse(columnValues[i]))) {
+            isDate = false;
+        }
+    }
+
+    if (isNumber) {
+        return "number";
+    } else if (isDate) {
+        return "date";
+    } else {
+        return "text";
+    }
+}
+
+function buildTableFooter(data, readonly) {
+    let html = "<tfoot id='db-table-footer'>";
+    console.log('data in buildTableFooter:', data);
+    if (!readonly) {
+        html += "<tr class='footer-row add-row'>";
+        data.columns.forEach((column) => {
+            if (column !== "id") {
+                let columnValues = data.data.map(row => row[column]);
+                let inputType = inferInputType(columnValues);
+                html += `<td class="input-cell footer-cell input-cell-${column}"><input type="${inputType}" id="new-${column}" name="${column}" class="form-control input input-${column}"></td>`;
+            }
+        });
+        html += `<td class="button-cell footer-cell button-cell-add"><button id="addRowButton" class="btn btn-primary">Add Row</button></td>`;
+        html += "</tr>";
+    }
+    html += "</tfoot>";
+    return html;
+}
+
+function buildTableHtml(data, readonly) {
+    let html = '<input id="db-table-search" type="text" oninput="filterTable(document.getElementById(\'db-table\'), this.value)" placeholder="Search...">';
+    html += '<table id="db-table">';
+    console.log('data in buildTableHtml:', data);
+    html += buildTableHeader(data.columns);
+    html += buildTableBody(data, readonly);
+    html += buildTableFooter(data, readonly);
     html += "</table>";
     return html;
 }
@@ -66,144 +153,86 @@ function saveCellChanges(rowId, columnName, newValue) {
     let data = {};
     data[columnName] = newValue;
 
-    $.ajax({
-        url: "controller.php",
-        type: "post",
-        data: { action: "update_row", database: database, table: table, id: rowId, data: data },
-        success: function (response) {
-            console.log("Server response: ", response);
-            if (response.status !== "success") {
-                showIssueBanner("Failed to update row");
-            }
-        },
-        error: function (response) {
-            console.log("AJAX error: ", response);
-            showIssueBanner(`Error ${response.status}: ${response.statusText}\n ${response.responseText}`);
-        },
+    ajaxRequest("post", {
+        action: "update_row",
+        database: database,
+        table: table,
+        id: rowId,
+        data: data
+    }, function (response) {
+        if (response.status !== "success") {
+            showIssueBanner("Failed to update row");
+        } else {
+            showSuccessBanner("Row updated successfully");
+        }
     });
 }
 
 function getDatabases() {
-    console.log("Getting databases");
-    $("#loading-banner").show();
-    $.ajax({
-        url: "controller.php",
-        type: "post",
-        data: { action: "get_databases" },
-        success: function (response) {
-            console.log(response);
-            var databases = response;
+    log("Getting databases");
+    return new Promise(function (resolve, reject) {
+        ajaxRequest("post", {action: "get_databases"}, function (response) {
+            let databases = response;
             databases.forEach(function (database) {
                 $("#sidebar").append(
-                    '<a id="action-database-' +
-                    database +
-                    '" href="#' +
-                    database +
-                    '" class="list-group-item list-group-item-action">' +
-                    database +
-                    "</a>"
+                    `<a id="action-database-${database}" href="#${database}" class="list-group-item list-group-item-action">${database}</a>`
                 );
             });
-            $("#loading-banner").hide();
-        },
-        error: function (response) {
-            console.log(response);
-            showIssueBanner(response.responseText);
-            $("#loading-banner").hide();
-        },
+            resolve();
+            if (response.status !== "success" && response.length === 0) {
+                console.log("Failed to get databases", response);
+                showIssueBanner("Failed to get databases");
+            } else {
+                console.log("Databases loaded successfully", response);
+                showSuccessBanner("Databases loaded successfully");
+            }
+        });
     });
 }
 
 function getTables(database) {
-    console.log("Getting tables for " + database);
-    $("#loading-banner").show();
-    $.ajax({
-        url: "controller.php",
-        type: "post",
-        data: { action: "get_tables", database: database },
-        success: function (response) {
-            console.log(response);
+    log("Getting tables for " + database);
+    return new Promise(function (resolve, reject) {
+        ajaxRequest("post", {action: "get_tables", database: database}, function (response) {
             var tables = response;
             tables.unshift("dashboard");
             $("#topbar").empty();
             tables.forEach(function (table) {
                 $("#topbar").append(
-                    '<a id="action-table-' +
-                    database +
-                    "-" +
-                    table +
-                    '" href="#' +
-                    database +
-                    "-" +
-                    table +
-                    '" class="list-group-item list-group-item-action">' +
-                    table +
-                    "</a>"
+                    `<a id="action-table-${database}-${table}" href="#${database}-${table}" class="list-group-item list-group-item-action">${table}</a>`
                 );
             });
-            $("#loading-banner").hide();
-        },
-        error: function (response) {
-            console.log(response);
-            showIssueBanner(response.responseText);
-            $("#loading-banner").hide();
-        },
+            resolve();
+        });
     });
 }
+
 function getTableData(database, table) {
-    console.log("Getting table data for " + database + "." + table);
-    $("#loading-banner").show();
-    $.ajax({
-        url: "controller.php",
-        type: "post",
-        data: { action: "get_table_data", database: database, table: table },
-        success: function (response) {
-            console.log(response);
-            var data = response;
-            var html = buildTableHtml(data, table === "dashboard");
-            $("#nav-tabContent-table").empty();
-            $("#nav-tabContent-table").append(html);
-            if (table != "dashboard") {
-                $("#nav-tabContent-table").append(
-                    '<button id="addRowButton" class="btn btn-primary">Add Row</button>'
-                );
-                $("#nav-tabContent-table").on("click", "#addRowButton", function () {
-                    $("#addRowModal").modal("show");
-                });
-            }
-            $("#addRowForm").empty();
-            data.columns.forEach((column) => {
-                if (column !== "id") {
-                    let columnValues = data.data.map(row => row[column]);
-                    let inputType = inferInputType(columnValues);
-                    $("#addRowForm").append(
-                        `<label for="${column}">${column}</label><input type="${inputType}" id="${column}" name="${column}" class="form-control">`
-                    );
-                }
-            });
-            $("#loading-banner").hide();
-        },
-        error: function (response) {
-            console.log(response);
-            showIssueBanner(response.responseText);
-            $("#loading-banner").hide();
-        },
+    log("Getting table data for " + database + "." + table);
+    ajaxRequest("post", {action: "get_table_data", database: database, table: table}, function (response) {
+        console.log(response);
+        tableData = response;
+        let html = buildTableHtml(response, table === "dashboard");
+        $("#nav-tabContent-table").empty();
+        $("#nav-tabContent-table").append(html);
     });
 }
+
 let sortDirection = {};
+
 function sortTable(table, colIndex) {
-    let rows = Array.from(table.rows);
-    let header = rows.shift();
+    let tbody = table.querySelector('tbody');
+    let rows = Array.from(tbody.rows);
     let direction = sortDirection[colIndex] || 1;
     rows.sort(
         (rowA, rowB) =>
             direction *
             (rowA.cells[colIndex].innerText > rowB.cells[colIndex].innerText ? 1 : -1)
     );
-    table.innerHTML = "";
-    table.append(header);
-    table.append(...rows);
+    tbody.innerHTML = "";
+    tbody.append(...rows);
     sortDirection[colIndex] = -direction;
+    let header = table.querySelector('thead tr');
     for (let i = 0; i < header.cells.length; i++) {
         let tempDiv = document.createElement("div");
         tempDiv.innerHTML = header.cells[i].innerHTML;
@@ -221,14 +250,14 @@ function sortTable(table, colIndex) {
 }
 
 function filterTable(table, query) {
-    let rows = Array.from(table.rows);
+    let tbody = table.querySelector('tbody');
+    let rows = Array.from(tbody.rows);
     if (query === "") {
         rows.forEach((row) => (row.style.display = ""));
         return;
     }
     if (query === "RICK")
         window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-    let header = rows.shift();
     for (let row of rows) {
         let shouldHide = Array.from(row.cells).every(
             (cell) => !cell.innerText.includes(query)
@@ -236,28 +265,73 @@ function filterTable(table, query) {
         row.style.display = shouldHide ? "none" : "";
     }
 }
-function showIssueBanner(message) {
-    $("#issue-message").text(message);
-    $("#issue-banner").show();
+
+function deleteRow(rowId) {
+    let database = $("#sidebar a.active").text();
+    let table = $("#nav-tabContent a.active").text();
+
+    ajaxRequest("post", {action: "delete_row", database: database, table: table, id: rowId}, function (response) {
+        if (response.status !== "success") {
+            showIssueBanner("Failed to delete row");
+        } else {
+            getTableData(database, table);
+        }
+    });
 }
-$("#issue-close").click(function () {
-    $("#issue-banner").hide();
-});
-$("#issue-copy").click(function () {
-    var tempInput = document.createElement("input");
-    tempInput.value = $("#issue-message").text();
-    document.body.appendChild(tempInput);
-    tempInput.select();
-    document.execCommand("copy");
-    document.body.removeChild(tempInput);
-    alert("Issue message copied to clipboard");
+
+$(document).ready(function () {
+    log("Document is ready");
+    getDatabases().then(function () {
+        if (database) {
+            $(`#action-database-${database}`).addClass("active");
+            getTables(database).then(function () {
+                if (table) {
+                    $(`#action-table-${database}-${table}`).addClass("active");
+                    getTableData(database, table);
+                }
+            });
+        }
+    });
+    $("#sidebar").on("click", "a", sidebarOnClick);
+    $("#nav-tabContent").on("click", "a", navTabContentOnClick);
+    $("#nav-tabContent-table").on("click", "#addRowButton", addRowButtonOnClick);
+    $("#issue-close").click(issueCloseOnClick);
+    $("#issue-copy").click(issueCopyOnClick);
+    $("#saveRow").click(saveRowOnClick);
+    $("#success-close").click(successCloseOnClick);
+    log("Document is loaded");
 });
 
-$("#saveRow").click(function () {
+function sidebarOnClick(e) {
+    e.preventDefault();
+    $("#sidebar a").removeClass("active");
+    $(this).addClass("active");
+    database = $(this).text();
+    log("Clicked on database " + database);
+    getTables(database);
+    window.history.pushState({}, '', `?database=${database}`);
+}
+
+function navTabContentOnClick(e) {
+    e.preventDefault();
+    let database = $("#sidebar a.active").text();
+    if (!database) {
+        showIssueBanner("Please select a database first");
+        return;
+    }
+    $("#nav-tabContent a").removeClass("active");
+    $(this).addClass("active");
+    table = $(this).text();
+    log("Clicked on table " + table);
+    getTableData(database, table);
+    window.history.pushState({}, '', `?database=${database}&table=${table}`);
+}
+
+function addRowButtonOnClick() {
     let database = $("#sidebar a.active").text();
     let table = $("#nav-tabContent a.active").text();
     let newRowData = {};
-    $("#addRowForm input").each(function() {
+    $("#db-table-footer input").each(function () {
         let input = $(this);
         newRowData[input.attr('name')] = input.val();
     });
@@ -267,48 +341,55 @@ $("#saveRow").click(function () {
         table: table,
         data: JSON.stringify(newRowData)
     };
-    console.log("Adding row: ", data);
-    $.ajax({
-        url: "controller.php",
-        type: "post",
-        data: data,
-        dataType: 'json',
-        success: function (response) {
-            console.log("Server response: ", response);
-            if (response.status !== "success") {
-                showIssueBanner("Failed to add row");
-            } else {
-                getTableData(database, table);
-            }
-        },
-        error: function (response) {
-            console.log("AJAX error: ", response);
-            showIssueBanner(`Error ${response.status}: ${response.statusText}\n ${response.responseText}`);
-        },
-    });
-});
-
-function deleteRow(rowId) {
-    let database = $("#sidebar a.active").text();
-    let table = $("#nav-tabContent a.active").text();
-
-    $.ajax({
-        url: "controller.php",
-        type: "post",
-        data: { action: "delete_row", database: database, table: table, id: rowId },
-        success: function (response) {
-            console.log("Server response: ", response);
-            if (response.status !== "success") {
-                showIssueBanner("Failed to delete row");
-            } else {
-                getTableData(database, table);  // Refresh the table
-            }
-        },
-        error: function (response) {
-            console.log("AJAX error: ", response);
-            showIssueBanner(`Error ${response.status}: ${response.statusText}\n ${response.responseText}`);
-        },
+    log("Adding row: ", data);
+    ajaxRequest("post", data, function (response) {
+        if (response.status !== "success") {
+            showIssueBanner("Failed to add row");
+        } else {
+            getTableData(database, table);
+            $("#db-table-footer input").val(''); // clear the input fields
+        }
     });
 }
 
-showIssueBanner("still a test lol");
+function issueCloseOnClick() {
+    ISSUE_BANNER.fadeOut();
+}
+
+function successCloseOnClick() {
+    SUCCESS_BANNER.fadeOut();
+}
+
+function issueCopyOnClick() {
+    var tempInput = document.createElement("input");
+    tempInput.value = ISSUE_MESSAGE.text();
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand("copy");
+    document.body.removeChild(tempInput);
+    alert("Issue message copied to clipboard");
+}
+
+function saveRowOnClick() {
+    let database = $("#sidebar a.active").text();
+    let table = $("#nav-tabContent a.active").text();
+    let newRowData = {};
+    $("#addRowForm input").each(function () {
+        let input = $(this);
+        newRowData[input.attr('name')] = input.val();
+    });
+    let data = {
+        action: "add_row",
+        database: database,
+        table: table,
+        data: JSON.stringify(newRowData)
+    };
+    log("Adding row: ", data);
+    ajaxRequest("post", data, function (response) {
+        if (response.status !== "success") {
+            showIssueBanner("Failed to add row");
+        } else {
+            getTableData(database, table);
+        }
+    });
+}

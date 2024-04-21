@@ -28,7 +28,7 @@
                     <div class="row" id="topbar" name="table-select">
                         <!-- Table names to select  will be loaded here -->
                     </div>
-                    <div class="container" id="db-table-container">
+                    <div class="" id="db-table-container">
                         <div class="table" id="nav-tabContent-table">
                             <!-- Table data will be loaded here -->
                         </div>
@@ -42,33 +42,14 @@
             </div>
         </div>
     </div>
-    <div class="modal" tabindex="-1" role="dialog" id="addRowModal">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Row</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true"><i class="fas fa-times"></i></span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="addRowForm">
-                        <!-- Input fields will be added here dynamically -->
-                        <input type="text" id="newRowData" placeholder="Enter new row data">
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="saveRow"><i class="fas fa-save"></i> Save</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal"><i
-                            class="fas fa-times-circle"></i> Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
     <div id="issue-banner">
         <span id="issue-message"><i class="fas fa-exclamation-triangle"></i></span>
         <button id="issue-copy"><i class="fas fa-copy"></i></button>
         <button id="issue-close"><i class="fas fa-times-circle"></i></button>
+    </div>
+    <div id="success-banner">
+        <span id="success-message"><i class="fas fa-check-circle"></i></span>
+        <button id="success-close"><i class="fas fa-times-circle"></i></button>
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
