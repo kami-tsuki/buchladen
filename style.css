@@ -42,6 +42,44 @@
         background-color: var(--light-color);
         color: var(--dark-color);
     }
+
+#console {
+    background-color: #000;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    font-family: 'Courier New', monospace;
+    height: 200px;
+    overflow: auto;
+}
+
+#sql-input {
+    background-color: #000;
+    color: #020;
+    border: none;
+    width: 100%;
+    min-height: 100px;
+    resize: none;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    tab-size: 4;
+}
+
+#sql-input:focus {
+    outline: none;
+}
+
+#execute-sql {
+    background-color: #0f0;
+    color: #000;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#sql-results {
+    margin-top: 20px;
+}
     
     div.page {
         font-family: var(--font-family-sans-serif);

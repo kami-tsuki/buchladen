@@ -43,11 +43,29 @@ function ajaxRequest(type, data, successCallback, errorCallback) {
         error: function (response) {
             log(response);
             showIssueBanner(response.responseText);
-            LOADING_BANNER.hide();
             if (errorCallback) errorCallback(response);
+            LOADING_BANNER.hide();
         },
     });
 }
+
+function executeSqlQuery() {
+    let sqlQuery = $("#sql-input").val();
+    sendSqlQuery(sqlQuery);
+}
+
+function sendSqlQuery(sqlQuery) {
+    console.log('Sending SQL query:', sqlQuery);
+    ajaxRequest("post", {action: "send_sql_query", sql: sqlQuery}, function (response) {
+        console.log('Received response:', response);
+        tableData = response;
+        let html = buildTableHtml(response, true);
+        console.log('Built HTML:', html);
+        $("#nav-tabContent-table").empty();
+        $("#nav-tabContent-table").append(html);
+    });
+}
+
 
 function buildTableHeader(columns) {
     let html = '<thead  id="db-table-header"><tr id="db-table-header-row">';
@@ -62,7 +80,7 @@ function buildTableHeader(columns) {
 function buildTableRow(row, columns, readonly) {
     let html = `<tr id="db-table-row-${row.id}" class="db-table-row">`;
     columns.forEach((column) => {
-        html += `<td id="db-table-cell-${row.id}-${column}" class="db-table-cell column-${column}" ${readonly ? '' : `contenteditable="true" onblur="saveCellChanges('${row.id}', '${column}', this.innerText)"`}>${row[column]}</td>`;
+        html += `<td id="db-table-cell-${row.id}-${column}" class="db-table-cell column-${column}" ${readonly ? '' : `contenteditable="true" onblur="saveCellChanges('${row.id}', '${column}', this.innerText, '${row[column]}')"`}>${row[column]}</td>`;
     });
     if (!readonly) {
         html += `<td><button onclick="deleteRow('${row.id}')">Delete</button></td>`;
@@ -147,12 +165,17 @@ function buildTableHtml(data, readonly) {
     return html;
 }
 
-function saveCellChanges(rowId, columnName, newValue) {
+function saveCellChanges(rowId, columnName, newValue, oldValue) {
     let database = $("#sidebar a.active").text();
     let table = $("#nav-tabContent a.active").text();
     let data = {};
     data[columnName] = newValue;
-
+    console.log("Old value:", oldValue);
+    console.log("New value:", newValue);
+    if (oldValue === newValue) {
+        console.log("No changes to save");
+        return;
+    }
     ajaxRequest("post", {
         action: "update_row",
         database: database,
@@ -299,6 +322,7 @@ $(document).ready(function () {
     $("#issue-copy").click(issueCopyOnClick);
     $("#saveRow").click(saveRowOnClick);
     $("#success-close").click(successCloseOnClick);
+    $("#execute-sql").click(executeSqlQuery);
     log("Document is loaded");
 });
 
@@ -306,10 +330,23 @@ function sidebarOnClick(e) {
     e.preventDefault();
     $("#sidebar a").removeClass("active");
     $(this).addClass("active");
-    database = $(this).text();
-    log("Clicked on database " + database);
-    getTables(database);
-    window.history.pushState({}, '', `?database=${database}`);
+    let selected = $(this).text();
+    if (selected === "Console") {
+        $("#console").show();
+        $("#db-table-container").hide();
+        $("#topbar").hide();
+        LOADING_BANNER.hide();
+        window.history.pushState({}, '', window.location.pathname);
+    } else {
+        $("#console").hide();
+        $("#db-table-container").show();
+        $("#topbar").show();
+        database = selected;
+        log("Clicked on database " + database);
+        getTables(database);
+        window.history.pushState({}, '', `?database=${database}`);
+        LOADING_BANNER.hide();
+    }
 }
 
 function navTabContentOnClick(e) {

@@ -77,6 +77,25 @@ try {
                     throw new Exception("Missing parameters for add_row action");
                 }
                 break;
+            case 'send_sql_query':
+                if (isset($_POST["sql"])) {
+                    error_log("Executing SQL: " . $_POST["sql"]);
+                    $result = $conn->query($_POST["sql"]);
+                    if ($conn->error) {
+                        throw new Exception("SQL error: " . $conn->error);
+                    }
+                    $data = array();
+                    if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            $data[] = $row;
+                        }
+                    }
+                    echo json_encode($data);
+                } else {
+                    throw new Exception("Missing parameters for query action");
+                }
+            default:
+                throw new Exception("Invalid action: " . $_POST["action"]);
         }
     }
 } catch (Exception $e) {
