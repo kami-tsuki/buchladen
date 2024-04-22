@@ -83,7 +83,7 @@ function buildTableRow(row, columns, readonly) {
         html += `<td id="db-table-cell-${row.id}-${column}" class="db-table-cell column-${column}" ${readonly ? '' : `contenteditable="true" onblur="saveCellChanges('${row.id}', '${column}', this.innerText, '${row[column]}')"`}>${row[column]}</td>`;
     });
     if (!readonly) {
-        html += `<td><button onclick="deleteRow('${row.id}')">Delete</button></td>`;
+        html += `<td ><button class="btn btn-danger button button-delete" id="delete-button-${row.id}" onclick="deleteRow('${row.id}')"><i class="fa fa-trash" aria-hidden="true"></i></button></td>`;
     }
     html += "</tr>";
     return html;
@@ -147,7 +147,7 @@ function buildTableFooter(data, readonly) {
                 html += `<td class="input-cell footer-cell input-cell-${column}"><input type="${inputType}" id="new-${column}" name="${column}" class="form-control input input-${column}"></td>`;
             }
         });
-        html += `<td class="button-cell footer-cell button-cell-add"><button id="addRowButton" class="btn btn-primary">Add Row</button></td>`;
+        html += `<td class="button-cell footer-cell button-cell-add"><button id="addRowButton" class="btn btn-primary button add-button">Add Row</button></td>`;
         html += "</tr>";
     }
     html += "</tfoot>";
