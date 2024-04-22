@@ -7,6 +7,7 @@
     --info-color: #17a2b8;
     --warning-color: #ffc107;
     --danger-color: #dc3545;
+    --delete-color: #a00;
     --light-color: #f8f9fa;
     --dark-color: #343a40;
     --primary-bg-color: #007bff;
@@ -73,7 +74,7 @@ html {
 }
 
 #execute-sql {
-    background-color: #f00;
+    background-color: var(--delete-color);
     color: #000;
     border: none;
     cursor: pointer;
@@ -110,9 +111,10 @@ html {
         border-radius: 0.5rem;
     }
 
-    .button {
+    #db-table button {
         border-radius: 0.4rem;
-        background-color: var(--danger-bg-color);
+        background-color: var(--delete-color);
+        border-color: var(--danger-color);
     }
     
     .alert-info {
