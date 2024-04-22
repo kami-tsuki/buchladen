@@ -15,7 +15,7 @@
     --info-bg-color: #17a2b8;
     --warning-bg-color: #ffc107;
     --danger-bg-color: #dc3545;
-    --cell-hover-color: #f2f2f2;
+    --cell-hover-color: #f2f200;
     --row-hover-color: #f2f2f2;
     --col-hover-color: #f2f2f2;
     --even-row-bg-color: #f2f2f2;
@@ -44,7 +44,7 @@
     }
 
 #console {
-    background-color: #000;
+    background-color: #444;
     color: #fff;
     padding: 10px;
     border-radius: 5px;
@@ -55,7 +55,7 @@
 
 #sql-input {
     background-color: #999;
-    color: #020;
+    color: #000;
     border: none;
     width: 100%;
     min-height: 100px;
@@ -71,7 +71,7 @@
 
 #execute-sql {
     background-color: #f00;
-    color: #900;
+    color: #000;
     border: none;
     cursor: pointer;
     margin-top: 10px;
