@@ -11,6 +11,7 @@
     --dark-color: #343a40;
     --primary-bg-color: #007bff;
     --secondary-bg-color: #6c757d;
+    --tertiary-bg-color: #444444;
     --success-bg-color: #28a745;
     --info-bg-color: #17a2b8;
     --warning-bg-color: #ffc107;
@@ -39,10 +40,12 @@
         line-height: 1.5;
         margin: 0;
         padding: 0;
-        background-color: var(--light-color);
+        background-color: var(--secondary-bg-color);
         color: var(--dark-color);
     }
-
+html {
+    background-color: var(--tertiary-bg-color);
+    
 #console {
     background-color: #444;
     color: #fff;
@@ -88,6 +91,15 @@
     .row-even {
         background-color: var(--even-row-bg-color);
     }
+    .row-odd {
+        background-color: var(--odd-row-bg-color);
+    }
+    .col-9 {
+        background-color: var(--tertiary-bg-color);
+    }
+    .col-3 {
+        background-color: var(--tertiary-bg-color);
+    }
     
     .alert-info {
         color: #39c4b6;
@@ -101,10 +113,6 @@
         color: rgb(232, 230, 227);
         background-color: rgba(120, 0, 125, 0.4);
         border-color: rgb(0, 86, 179);
-    }
-    
-    .row-odd {
-        background-color: var(--odd-row-bg-color);
     }
     
     .db-table-cell:hover {
