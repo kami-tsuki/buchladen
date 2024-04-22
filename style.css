@@ -48,13 +48,13 @@
     color: #fff;
     padding: 10px;
     border-radius: 5px;
-    font-family: 'Courier New', monospace;
+    font-family: 'Rajdhani', monospace;
     height: 200px;
     overflow: auto;
 }
 
 #sql-input {
-    background-color: #000;
+    background-color: #999;
     color: #020;
     border: none;
     width: 100%;
@@ -70,8 +70,8 @@
 }
 
 #execute-sql {
-    background-color: #0f0;
-    color: #000;
+    background-color: #f00;
+    color: #900;
     border: none;
     cursor: pointer;
     margin-top: 10px;
@@ -108,7 +108,7 @@
     }
     
     .db-table-cell:hover {
-        background-color: var(--light-color);
+        background-color: var(--cell-hover-color);
     }
     
     .db-table-cell:hover::before,
