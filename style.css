@@ -120,6 +120,7 @@ html {
         background-color: var(--secondary-bg-color);
         border-radius: 0.5rem;
         margin-top: 1rem;
+        width: auto;
         display: inline-block;
     }
 
