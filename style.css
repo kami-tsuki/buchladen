@@ -62,11 +62,12 @@ html {
     color: #000;
     border: none;
     width: 100%;
-    min-height: 100px;
+    min-height: 3rem;
     resize: none;
     white-space: pre-wrap;
     overflow-wrap: break-word;
     tab-size: 4;
+    border-radius: 0.5rem;
 }
 
 #sql-input:focus {
@@ -79,10 +80,19 @@ html {
     border: none;
     cursor: pointer;
     margin-top: 10px;
+    border-radius: 0.5rem;
+}
+#db-table-search {
+  align-content: center;
+  border-radius: 0.5rem 0 0 0;
 }
 
 #sql-results {
     margin-top: 20px;
+}
+
+#action-table {
+    background-color: var();
 }
     
     div.page {
@@ -109,6 +119,8 @@ html {
     .table {
         background-color: var(--secondary-bg-color);
         border-radius: 0.5rem;
+        margin-top: 1rem;
+        display: inline-block;
     }
 
     #db-table button {
@@ -130,7 +142,10 @@ html {
         background-color: rgba(120, 0, 125, 0.4);
         border-color: rgb(0, 86, 179);
     }
-    
+    .list-group-item {     
+        background-color: rgba(50, 50, 125, 0.9);
+        color: rgb(200, 230, 227);
+    }
     .db-table-cell:hover {
         background-color: var(--cell-hover-color);
     }
