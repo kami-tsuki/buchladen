@@ -10,7 +10,7 @@
     --light-color: #f8f9fa;
     --dark-color: #343a40;
     --primary-bg-color: #007bff;
-    --secondary-bg-color: #6c757d;
+    --secondary-bg-color: #7d7d7e;
     --tertiary-bg-color: #444444;
     --success-bg-color: #28a745;
     --info-bg-color: #17a2b8;
@@ -96,9 +96,23 @@ html {
     }
     .col-9 {
         background-color: var(--tertiary-bg-color);
+        display: flex;
+        flex-direction: column;
     }
     .col-3 {
         background-color: var(--tertiary-bg-color);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .table {
+        background-color: var(--secondary-bg-color);
+        border-radius: 0.5rem;
+    }
+
+    .button {
+        border-radius: 0.4rem;
+        background-color: var(--danger-bg-color);
     }
     
     .alert-info {
@@ -168,7 +182,6 @@ html {
         top: 0;
         left: 0;
         height: 100%;
-        width: 200px;
         overflow-y: auto;
         background-color: #333;
         padding: 20px;
