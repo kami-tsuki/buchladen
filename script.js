@@ -147,7 +147,7 @@ function buildTableFooter(data, readonly) {
                 html += `<td class="input-cell footer-cell input-cell-${column}"><input type="${inputType}" id="new-${column}" placeholder="${column}" name="${column}" class="form-control input input-${column}"></td>`;
             }
         });
-        html += `<td class="button-cell footer-cell button-cell-add"><button id="addRowButton" class="btn btn-primary button add-button">Add Row</button></td>`;
+        html += `<td class="button-cell footer-cell button-cell-add"><button id="addRowButton" class="btn btn-primary button add-button"><i class="fa fa-plus" aria-hidden="true"></i></button></td>`;
         html += "</tr>";
     }
     html += "</tfoot>";
