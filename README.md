@@ -14,10 +14,11 @@ Cyber My Admin ist eine benutzerfreundliche Webanwendung, die es ermöglicht, Da
 - MySQL-Datenbank
 
 ### Schritte
-1. **Dateien herunterladen**: Lade die Dateien der Cyber My Admin-Anwendung auf deinen Webserver hoch.
-2. **Datenbank einrichten**: Erstelle eine MySQL-Datenbank und importiere bei Bedarf Testdaten aus den bereitgestellten SQL-Dateien.
-3. **Konfiguration**: Passe die Datei `credentials.php` an, um die Verbindungsdaten zur MySQL-Datenbank einzutragen.
-4. **Zugriffsrechte**: Stelle sicher, dass die Dateien die richtigen Zugriffsrechte haben, um vom Webserver ausgeführt zu werden.
+1. **Dateien herunterladen**: Lade die Dateien der Cyber My Admin-Anwendung auf deinen Webserver hoch. [buchladen-master.zip](https://github.com/tsuki-kami-studios/buchladen/archive/refs/heads/master.zip)
+2. **Für Xampp**: Zip Datei entpacken und Ordner **buchladen** in `./xampp/htdocs/` verschieben. Dann `./style.css` und `./script.js` eine Ebene hoch in `./xampp/htdocs/` verschieben. Wenn das Standard Datenbank Passwort verwendet wird: `./credentials.json` löschen, ansonsten die Daten anpassen.
+3. **Datenbank einrichten**: Erstelle eine MySQL-Datenbank und importiere bei Bedarf Testdaten aus den bereitgestellten SQL-Dateien.
+4. **Konfiguration**: Passe die Datei `./credentials.php` an, um die Verbindungsdaten zur MySQL-Datenbank einzutragen.
+5. **Zugriffsrechte**: Stelle sicher, dass die Dateien die richtigen Zugriffsrechte haben, um vom Webserver ausgeführt zu werden.
 
 ---
 
