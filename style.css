@@ -1,142 +1,236 @@
 /* Theme Name: Default */
 /* color vars: */
 :root {
---primary-color: #007bff;
---secondary-color: #6c757d;
---success-color: #28a745;
---info-color: #17a2b8;
---warning-color: #ffc107;
---danger-color: #dc3545;
---light-color: #f8f9fa;
---dark-color: #343a40;
---primary-bg-color: #007bff;
---secondary-bg-color: #6c757d;
---success-bg-color: #28a745;
---info-bg-color: #17a2b8;
---warning-bg-color: #ffc107;
---danger-bg-color: #dc3545;
---cell-hover-color: #f2f2f2;
---row-hover-color: #f2f2f2;
---col-hover-color: #f2f2f2;
---even-row-bg-color: #f2f2f2;
---odd-row-bg-color: #fff;
-
-/* issue banner */
---issue-bg-color: #dc3545;
---issue-border-color: #dc3545;
---issue-text-color: #fff;
---issue-button-color: #dc3545;
-
-/* font vars */
---font-family-sans-serif: 'Rajdhani', sans-serif !important;
---font-family-monospace: 'Rajdhani', monospace !important;
-
-}
-
-body {
-    font-family: var(--font-family-sans-serif);
-    font-size: 16px;
-    line-height: 1.5;
-    margin: 0;
-    padding: 0;
-    background-color: var(--light-color);
-    color: var(--dark-color);
-}
-
-div.page {
-    font-family: var(--font-family-sans-serif);
-}
-
-.row-even {
-    background-color: var(--even-row-bg-color);
-}
-
-.row-odd {
-    background-color: var(--odd-row-bg-color);
-}
-
-.db-table-cell:hover {
-    background-color: var(--light-color);
-}
-
-.db-table-cell:hover::before,
-.db-table-cell:hover::after {
-    background-color: var(--cell-hover-color);
-}
-
-tr.db-table-row:hover {
-    border: 5px solid var(--dark-color) !important;
-}
-
-#loading-banner {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 9999;
-}
-
-#issue-banner {
-    display: none;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    background-color: var(--issue-bg-color);
-    border: 2px solid var(--issue-border-color);
-    color: var(--issue-text-color);
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --info-color: #17a2b8;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --delete-color: #a00;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --primary-bg-color: #007bff;
+    --secondary-bg-color: #7d7d7e;
+    --tertiary-bg-color: #444444;
+    --success-bg-color: #28a745;
+    --info-bg-color: #17a2b8;
+    --warning-bg-color: #ffc107;
+    --danger-bg-color: #dc3545;
+    --cell-hover-color: #f2f200;
+    --row-hover-color: #f2f2f2;
+    --col-hover-color: #f2f2f2;
+    --even-row-bg-color: #f2f2f2;
+    --odd-row-bg-color: #fff;
+    
+    /* issue banner */
+    --issue-bg-color: #dc3545;
+    --issue-border-color: #dc3545;
+    --issue-text-color: #fff;
+    --issue-button-color: #dc3545;
+    
+    /* font vars */
+    --font-family-sans-serif: 'Rajdhani', sans-serif !important;
+    --font-family-monospace: 'Rajdhani', monospace !important;
+    
+    }
+    
+    body {
+        font-family: var(--font-family-sans-serif);
+        font-size: 16px;
+        line-height: 1.5;
+        margin: 0;
+        padding: 0;
+        background-color: var(--secondary-bg-color);
+        color: var(--dark-color);
+    }
+html {
+    background-color: var(--tertiary-bg-color);
+    
+#console {
+    background-color: #444;
+    color: #fff;
     padding: 10px;
+    border-radius: 5px;
+    font-family: 'Rajdhani', monospace;
+    height: 200px;
+    overflow: auto;
 }
 
-#issue-close, #issue-copy{
+#sql-input {
+    background-color: #999;
+    color: #000;
+    border: none;
+    min-height: 3rem;
+    resize: none;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    tab-size: 4;
+    border-radius: 0.5rem;
+    width: 100%;
+}
 
-    position: absolute;
+#sql-input:focus {
+    outline: none;
+}
+
+#execute-sql {
+    background-color: var(--delete-color);
+    color: #000;
+    border: none;
     cursor: pointer;
+    margin-top: 10px;
+    border-radius: 0.5rem;
+}
+#db-table-search {
+  align-content: center;
+  border-radius: 0.5rem 0 0 0;
 }
 
-#issue-close{
-    right: 50px;
-}
-#issue-copy{
-    right: 10px;
-}
-/* Sidebar styles */
-#sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 200px;
-    overflow-y: auto;
-    background-color: #333;
-    padding: 20px;
-    color: #fff;
+#sql-results {
+    margin-top: 20px;
 }
 
-#topbar {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap; 
-    justify-content: space-between;
-    overflow-x: auto;
-    white-space: nowrap;
-    background-color: #333;
-    color: #fff;
-    padding: 20px;
+#action-table {
+    background-color: var();
 }
+    
+    div.page {
+        font-family: var(--font-family-sans-serif);
+    }
+    
+    .row-even {
+        background-color: var(--even-row-bg-color);
+    }
+    .row-odd {
+        background-color: var(--odd-row-bg-color);
+    }
+    .col-9 {
+        background-color: var(--tertiary-bg-color);
+        display: flex;
+        flex-direction: column;
+    }
+    .col-3 {
+        background-color: var(--tertiary-bg-color);
+        display: flex;
+        flex-direction: column;
+    }
 
-::-webkit-scrollbar {
-    width: 10px;
-}
+    .table {
+        background-color: var(--secondary-bg-color);
+        border-radius: 0.5rem;
+        margin-top: 1rem;
+        width: auto;
+        display: inline-block;
+    }
 
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #888;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
+    #db-table button {
+        border-radius: 0.4rem;
+        background-color: var(--delete-color);
+        border-color: var(--danger-color);
+    }
+    
+    .alert-info {
+        color: #39c4b6;
+        background-color: #fee801;
+        border-color: #54c1e6;
+        border-width: 0.2rem;
+        font-weight: 1000;
+    }
+    
+    .list-group-item.active {
+        color: rgb(232, 230, 227);
+        background-color: rgba(120, 0, 125, 0.4);
+        border-color: rgb(0, 86, 179);
+    }
+    .list-group-item {     
+        background-color: rgba(50, 50, 125, 0.9);
+        color: rgb(200, 230, 227);
+    }
+    .db-table-cell:hover {
+        background-color: var(--cell-hover-color);
+    }
+    
+    .db-table-cell:hover::before,
+    .db-table-cell:hover::after {
+        background-color: var(--cell-hover-color);
+    }
+    
+    tr.db-table-row:hover {
+        border: 5px solid var(--dark-color) !important;
+    }
+    
+    #loading-banner {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+    }
+    
+    #issue-banner {
+        display: none;
+        position: fixed;
+        bottom: 10%;
+        width: 100%;
+        background-color: var(--issue-bg-color);
+        border: 2px solid var(--issue-border-color);
+        color: var(--issue-text-color);
+        padding: 10px;
+        z-index:9999;
+    
+    }
+    
+    #issue-close, #issue-copy{
+    
+        position: absolute;
+        cursor: pointer;
+    }
+    
+    #issue-close{
+        right: 50px;
+    }
+    #issue-copy{
+        right: 10px;
+    }
+    /* Sidebar styles */
+    #sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        overflow-y: auto;
+        background-color: #333;
+        padding: 20px;
+        color: #fff;
+    }
+    
+    #topbar {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap; 
+        justify-content: space-between;
+        overflow-x: auto;
+        white-space: nowrap;
+        background-color: #333;
+        color: #fff;
+        padding: 20px;
+    }
+    
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: #888;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+    

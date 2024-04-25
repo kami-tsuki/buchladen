@@ -12,13 +12,10 @@ function getCredentialsByName($name) {
     $credentials = json_decode(file_get_contents($credentialsFile), true);
     return $credentials[$name];
 }
-
 $servername = getCredentialsByName("servername");
 $username = getCredentialsByName("username");
 $password = getCredentialsByName("password");
 $conn = new mysqli($servername, $username, $password);
-
-// Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
