@@ -92,11 +92,12 @@ html {
 }
 
 #action-table {
-    background-color: var();
+    background-color: var(--success-color);
 }
 
     #addRowButton {
-        background-color: var(--success-color);
+        background-color: var(--success-color) !important;
+        border-color: var(--primary-color) !important;
     }
     
     div.page {
