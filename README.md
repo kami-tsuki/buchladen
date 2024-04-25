@@ -41,7 +41,7 @@ Die Benutzeroberfläche von Cyber My Admin ist einfach und intuitiv gestaltet. H
 ### Daten bearbeiten
 
 1. Klicke auf eine Zelle, um sie zu bearbeiten. Änderungen werden automatisch gespeichert.
-2. Füge neue Daten hinzu, indem du auf den "Add Row" Button klickst und die erforderlichen Informationen eingibst.
+2. Füge neue Daten hinzu, indem du auf den "+" Button klickst und die erforderlichen Informationen eingibst.
 3. Lösche eine Zeile, indem du auf den "Delete" Button klickst.
 
 ### SQL-Abfragen ausführen
