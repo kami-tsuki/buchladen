@@ -144,7 +144,7 @@ function buildTableFooter(data, readonly) {
             if (column !== "id") {
                 let columnValues = data.data.map(row => row[column]);
                 let inputType = inferInputType(columnValues);
-                html += `<td class="input-cell footer-cell input-cell-${column}"><input type="${inputType}" id="new-${column}" name="${column}" class="form-control input input-${column}"></td>`;
+                html += `<td class="input-cell footer-cell input-cell-${column}"><input type="${inputType}" id="new-${column}" placeholder="${column}" name="${column}" class="form-control input input-${column}"></td>`;
             }
         });
         html += `<td class="button-cell footer-cell button-cell-add"><button id="addRowButton" class="btn btn-primary button add-button">Add Row</button></td>`;
