@@ -65,7 +65,7 @@ Wenn du Fragen oder Probleme hast, zögere nicht, uns zu kontaktieren. Wir helfe
 
 Kontaktiere uns unter support@kami-hub.com.
 
-Besuche auch unsere [Website](https://www.kami-hub.com.com) für weitere Informationen und Updates.
+Besuche auch unsere [Website](https://www.kami-hub.com) für weitere Informationen und Updates.
 
 ---
 
