@@ -94,6 +94,10 @@ html {
 #action-table {
     background-color: var();
 }
+
+    #addRowButton {
+        background-color: var(--success-color);
+    }
     
     div.page {
         font-family: var(--font-family-sans-serif);
