@@ -18,7 +18,7 @@
     --warning-bg-color: #ffc107;
     --danger-bg-color: #dc3545;
     --cell-hover-color: #f2f200;
-    --row-hover-color: #f2f2f2;
+    --row-hover-color: #dddddd;
     --col-hover-color: #f2f2f2;
     --even-row-bg-color: #f2f2f2;
     --odd-row-bg-color: #fff;
@@ -171,7 +171,7 @@ div.page {
 }
 
 tr.db-table-row:hover {
-    border: 5px solid var(--dark-color) !important;
+    background-color: var(--row-hover-color);
 }
 
 #loading-banner {
