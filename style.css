@@ -84,6 +84,7 @@ html {
     cursor: pointer;
     margin-top: 10px;
     border-radius: 0.5rem;
+    font-weight: 500;
 }
 
 #db-table-search {
@@ -181,6 +182,21 @@ tr.db-table-row:hover {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 9999;
+}
+#success-banner {
+    background-color: var(--success-bg-color);
+    text-align: center;
+    position: fixed;
+    padding-left: 1rem;
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+    bottom: 0;
+}
+
+#success-close {
+    border-radius: 0.5rem;
+    border-color: var(--danger-color);
+    color: var(--danger-color);
 }
 
 #issue-banner {
