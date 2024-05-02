@@ -320,10 +320,9 @@ function deleteRow(value,valuesec) {
             sqldel += ` AND ${table}.${primaryKeys[1]} = ${rowNumbersec}`;
         }
         console.log(sqldel);
-        ajaxRequest("post", { action: "delete_row", sql: sqldel }, function (response) {
-        console.log('Deleting:'+response);
-        showSuccessBanner("Deleted");
-    });
+        ajaxRequest("post", { action: "delete_row", sql: sqldel },
+        showSuccessBanner("Deleted")
+        );
     });
 }
 
