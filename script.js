@@ -77,13 +77,20 @@ function buildTableHeader(columns) {
     return html;
 }
 
-function buildTableRow(row, columns, readonly) {
-    let html = `<tr id="db-table-row-${row.id}" class="db-table-row">`;
+function buildTableRow(row, columns, readonly, rowNumber) {
+    let html = `<tr id="db-table-row-${rowNumber}" class="db-table-row">`;
+    let count = rowNumber;
+    let columndel = columns[0];
+    let colid = row[columndel];
+    let columndelsec = columns[1];
+    let colidsec = row[columndelsec];
     columns.forEach((column) => {
-        html += `<td id="db-table-cell-${row.id}-${column}" class="db-table-cell column-${column}" ${readonly ? '' : `contenteditable="true" onblur="saveCellChanges('${row.id}', '${column}', this.innerText, '${row[column]}')"`}>${row[column]}</td>`;
+        html += `<td id="db-table-cell-${count}-${column}" class="db-table-cell column-${column}" ${readonly ? '' : `contenteditable="true" onblur="saveCellChanges(this.innerText, '${column}', this.innerText, '${row[column]}')"`}>${row[column]}</td>`;
     });
     if (!readonly) {
-        html += `<td ><button class="btn btn-danger button button-delete" id="delete-button-${row.id}" onclick="deleteRow('${row.id}')"><i class="fa fa-trash" aria-hidden="true"></i></button></td>`;
+        console.log("td#db-table-cell-"+count+"-"+columndel);
+        console.log("Count "+count+" col "+columndel+" colid "+colid);
+        html += `<td ><button class="btn btn-danger button button-delete" id="delete-button-${count}" onclick="deleteRow(${colid},'${colidsec}')"><i class="fa fa-trash" aria-hidden="true"></i></button></td>`;
     }
     html += "</tr>";
     return html;
@@ -91,9 +98,11 @@ function buildTableRow(row, columns, readonly) {
 
 function buildTableBody(data, readonly) {
     let html = '<tbody id="db-table-body">';
+    let rowNumber = 1;
     console.log('data in buildTableBody:', data);
     data.data.forEach((row) => {
-        html += buildTableRow(row, data.columns, readonly);
+        html += buildTableRow(row, data.columns, readonly, rowNumber);
+        rowNumber++;
     });
     html += "</tbody>";
     return html;
@@ -180,7 +189,8 @@ function saveCellChanges(rowId, columnName, newValue, oldValue) {
         action: "update_row",
         database: database,
         table: table,
-        id: rowId,
+        id: oldValue,
+        column: columnName,
         data: data
     }, function (response) {
         if (response.status !== "success") {
@@ -289,16 +299,29 @@ function filterTable(table, query) {
     }
 }
 
-function deleteRow(rowId) {
+function deleteRow(value,valuesec) {
     let database = $("#sidebar a.active").text();
     let table = $("#nav-tabContent a.active").text();
-
-    ajaxRequest("post", {action: "delete_row", database: database, table: table, id: rowId}, function (response) {
-        if (response.status !== "success") {
-            showIssueBanner("Failed to delete row");
-        } else {
-            getTableData(database, table);
+    let sql = `SHOW COLUMNS FROM ${database}.${table} LIKE '%id%';`;
+    let rowNumber = value;
+    let rowNumbersec = valuesec;
+    ajaxRequest("post", { action: "delete_row_sql", sql: sql }, function (response) {
+        let primaryKeys = [];
+        response.forEach(function (column) {
+            if (column.Key === 'PRI') {
+                primaryKeys.push(column.Field);
+            }
+        });
+        console.log('Primary keys:', primaryKeys);
+        sqldel = `DELETE FROM ${database}.${table} WHERE ${table}.${primaryKeys[0]} = ${rowNumber}`;
+        if (primaryKeys[1]!=null){
+            sqldel += ` AND ${table}.${primaryKeys[1]} = ${rowNumbersec}`;
         }
+        console.log(sqldel);
+        ajaxRequest("post", { action: "delete_row", sql: sqldel }, function (response) {
+        console.log('Deleting:'+response);
+        showSuccessBanner("Deleted");
+    });
     });
 }
 
