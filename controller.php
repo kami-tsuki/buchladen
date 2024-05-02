@@ -27,17 +27,33 @@ try {
                     echo json_encode(getTable($_POST["database"], $_POST["table"]));
                 }
                 break;
-            case 'delete_row':
-                if (isset($_POST["database"]) && isset($_POST["table"]) && isset($_POST["id"])) {
-                    error_log("Deleting row with id: " . $_POST["id"] . " from table: " . $_POST["table"] . " in database: " . $_POST["database"]);
-                    $sql = "DELETE FROM " . $_POST["database"] . "." . $_POST["table"] . " WHERE id=" . $_POST["id"];
-                    $conn->query($sql);
+            case 'delete_row_sql':
+                if (isset($_POST["sql"])) {
+                    error_log("Executing SQL: " . $_POST["sql"]);
+                    $result = $conn->query($_POST["sql"]);
                     if ($conn->error) {
                         throw new Exception("SQL error: " . $conn->error);
                     }
-                    echo json_encode(array('status' => 'success'));
+                    $data = array();
+                    if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            $data[] = $row;
+                        }
+                    }
+                    echo json_encode($data);
                 } else {
-                    throw new Exception("Missing parameters for delete_row action");
+                    throw new Exception("Missing parameters for query action");
+                }
+                break;
+            case 'delete_row':
+                if (isset($_POST["sql"])) {
+                    error_log("Executing SQL: " . $_POST["sql"]);
+                    $result = $conn->query($_POST["sql"]);
+                    if ($conn->error) {
+                        throw new Exception("SQL error: " . $conn->error);
+                    }
+                } else {
+                    throw new Exception("Missing parameters for query action");
                 }
                 break;
             case 'reset_database':
@@ -50,9 +66,9 @@ try {
                 }
                 break;
             case 'update_row':
-                if (isset($_POST["database"]) && isset($_POST["table"]) && isset($_POST["id"]) && isset($_POST["data"])) {
-                    error_log("Updating row with id: " . $_POST["id"] . " in table: " . $_POST["table"] . " in database: " . $_POST["database"]);
-                    $success = updateRow($_POST["database"], $_POST["table"], $_POST["id"], $_POST["data"]);
+                if (isset($_POST["database"]) && isset($_POST["table"]) && isset($_POST["id"])&& isset($_POST["column"]) && isset($_POST["data"])) {
+                    error_log("Updating row with: ". $_POST["column"] ."=" . $_POST["id"] . " in table: " . $_POST["table"] . " in database: " . $_POST["database"]);
+                    $success = updateRow($_POST["database"], $_POST["table"], $_POST["id"], $_POST["column"], $_POST["data"]);
                     echo json_encode(array('status' => 'success'));
                 } else {
                     throw new Exception("Missing parameters for update_row action");
@@ -125,7 +141,7 @@ function resetDatabase($database)
     return true;
 }
 
-function updateRow($database, $table, $id, $data)
+function updateRow($database, $table, $oldValue, $column, $data)
 {
     global $conn;
     $sql = "UPDATE $database.$table SET ";
@@ -136,7 +152,7 @@ function updateRow($database, $table, $id, $data)
         $sql .= "$key='$value',";
     }
     $sql = rtrim($sql, ',');
-    $sql .= " WHERE id=$id";
+    $sql .= " WHERE $column='$oldValue'";
     error_log("Executing SQL: " . $sql);
     $conn->query($sql);
     if ($conn->error) {
