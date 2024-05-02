@@ -10,11 +10,13 @@ const SUCCESS_BANNER = $("#success-banner");
 const SUCCESS_MESSAGE = $("#success-message");
 
 function showIssueBanner(message) {
+    if (message.length >1){
     ISSUE_MESSAGE.text(message);
     ISSUE_BANNER.show();
     setTimeout(function () {
         ISSUE_BANNER.fadeOut();
     }, 10000);
+    }
 }
 
 function showSuccessBanner(message) {
