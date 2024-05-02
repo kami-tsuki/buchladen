@@ -1,7 +1,7 @@
 <?php
 function getCredentialsByName($name) {
     $credentialsFile = './credentials.json';
-    if (!file_exists($credentialsFile)) {
+    if (!file_exists($credentialsFile) || ctype_space(file_get_contents($credentialsFile))) {
         $defaultCredentials = [
             'servername' => 'localhost',
             'username' => 'root',
