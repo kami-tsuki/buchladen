@@ -73,6 +73,7 @@ Besuche auch unsere [Website](https://www.kami-hub.com) für weitere Information
 ## Screenshots
 
 ...
+![image](https://github.com/tsuki-kami-studios/buchladen/assets/160274072/f106ddc2-4820-486e-a88c-0c0bc51669ae)
 
 ---
 
